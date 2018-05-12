@@ -14,8 +14,6 @@ class featureCpp{
 public:
     featureCpp(float x, float y, size_t frame_num){
         _id = global_cnt++;
-        if(_id == 5)
-            cout << "x: " << x << " y: " << y << endl;
         _begin_frame = frame_num;
         _location.push_back(make_pair(x, y));
     }
@@ -99,6 +97,7 @@ void running_tracking_stocastic(mapOfFeature &mof){
          << "sumOv: \t" << sumOver << "\t" << sumOver/mof._allFeature.size() << endl;
 }
 
+
 void featurelistToVec(KLT_FeatureList featurelist, vector<cv::Point2f> &vec){
     vec.clear();
     for(int i=0; i<featurelist->nFeatures; ++i){
@@ -107,11 +106,11 @@ void featurelistToVec(KLT_FeatureList featurelist, vector<cv::Point2f> &vec){
     }
 }
 
-void VecToFeaturelist(vector<cv::Point2f> &vec, vector<uchar> &status, KLT_FeatureList featurelist){
+void VecToFeaturelist(vector<cv::Point2f> &vec, vector<uchar> &status, KLT_FeatureList featurelist, vector<float> &err, float maxResidual){
     for(int i=0; i<status.size(); ++i){
         if(status[i] == 0){ // lost
             featurelist->feature[i]->val = -1;
-        }else{
+        }else if(err[i] <= maxResidual){
             featurelist->feature[i]->val = KLT_TRACKED;
             featurelist->feature[i]->x = vec[i].x;
             featurelist->feature[i]->y = vec[i].y;
@@ -146,6 +145,15 @@ int main(){
     tc->affineConsistencyCheck = 0;  /* set this to 2 to turn on affine consistency check */
     tc->smoothBeforeSelecting = FALSE;
 
+    float maxResidual = 10.0;
+    int templateSize = 19;
+    int pyramidLevel = 3;
+
+    cout << "euroc opencv: " << endl;
+    cout << "maxResidual: " << maxResidual << endl;
+    cout << "templateSize: " << templateSize << endl;
+    cout << "pyramidLevel: " << pyramidLevel << endl;
+
     mapOfFeature featureLogging;
 
     cv::Mat img1 = cv::imread(allImage[beginIndex], 0);
@@ -162,15 +170,14 @@ int main(){
     draw_feature(img2rgb, fl, featureLogging);
     cv::imshow("img2", img2rgb);
     cv::waitKey(500);
-    cout << "min eigen val: " << tc->min_eigenvalue << " mindist: " << tc->mindist << endl;
     for (i = beginIndex+1 ; i < 1570 ; i++)  {
         cv::Mat img2 = cv::imread(allImage[i], 0);
         vector<cv::Point2f> next_point;
         vector<uchar> status;
         vector<float> err;
-        cv::calcOpticalFlowPyrLK(img1, img2, pre_point, next_point, status, err, cv::Size(7,7), 3);
+        cv::calcOpticalFlowPyrLK(img1, img2, pre_point, next_point, status, err, cv::Size(templateSize,templateSize), pyramidLevel);
         // KLTTrackFeatures(tc, (unsigned char*)(img1.data), (unsigned char*)(img2.data), ncols, nrows, fl);
-        VecToFeaturelist(next_point, status, fl);
+        VecToFeaturelist(next_point, status, fl, err, maxResidual);
         KLTReplaceLostFeatures(tc, (unsigned char*)(img2.data), ncols, nrows, fl);
         featurelistToVec(fl, pre_point);
         // KLTStoreFeatureList(fl, ft, i);
@@ -182,11 +189,11 @@ int main(){
         cv::waitKey(1);
         img1 = img2;
     }
-    size_t length = featureLogging._allFeature[5]._location.size();
-    cout << "sdfdsf: " << featureLogging._allFeature[5]._location[0].second << endl;
-    cout << "location of feature id 5: " << endl;
-    for(int i=0; i<length; ++i)
-        cout << featureLogging._allFeature[5]._location[i].first << " " << featureLogging._allFeature[5]._location[i].second << endl;
+    // size_t length = featureLogging._allFeature[5]._location.size();
+    // cout << "sdfdsf: " << featureLogging._allFeature[5]._location[0].second << endl;
+    // cout << "location of feature id 5: " << endl;
+    // for(int i=0; i<length; ++i)
+    //     cout << featureLogging._allFeature[5]._location[i].first << " " << featureLogging._allFeature[5]._location[i].second << endl;
     // KLTWriteFeatureTable(ft, "features.txt", "%5.1f");
     // KLTWriteFeatureTable(ft, "features.ft", NULL);
     running_tracking_stocastic(featureLogging);

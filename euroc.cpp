@@ -14,8 +14,6 @@ class featureCpp{
 public:
     featureCpp(float x, float y, size_t frame_num){
         _id = global_cnt++;
-        if(_id == 5)
-            cout << "x: " << x << " y: " << y << endl;
         _begin_frame = frame_num;
         _location.push_back(make_pair(x, y));
     }
@@ -165,9 +163,12 @@ int main(){
 // } *KLT_TrackingContext;
 tc->nPyramidLevels = 4;
 tc->subsampling = 2;
-tc->window_height = 7;
-tc->window_width = 7;
-tc->lighting_insensitive = 1;
+tc->window_height = 19;
+tc->window_width = 19;
+tc->lighting_insensitive = 0;
+tc->max_residue = 10;
+// tc->affineConsistencyCheck  = 2;
+cout << "euroc using klt: " << endl;
     cout << "system settings: " << endl 
          << "mindist: " << tc->mindist << endl
          << "window_width: " << tc->window_width << endl
@@ -185,7 +186,8 @@ tc->lighting_insensitive = 1;
          << "nPyramidLevels: " << tc->nPyramidLevels << endl
          << "subsampling: " << tc->subsampling << endl
          << "affine_window_width: " << tc->affine_window_width << endl
-         << "affine_window_height: " << tc->affine_window_height << endl;
+         << "affine_window_height: " << tc->affine_window_height << endl
+         << "affineConsistencyCheck: " << tc->affineConsistencyCheck << endl;
 
     mapOfFeature featureLogging;
 
@@ -202,7 +204,7 @@ tc->lighting_insensitive = 1;
     draw_feature(img2rgb, fl, featureLogging);
     cv::imshow("img2", img2rgb);
     cv::waitKey(500);
-    cout << "min eigen val: " << tc->min_eigenvalue << " mindist: " << tc->mindist << endl;
+
     for (i = beginIndex+1 ; i < 1570 ; i++)  {
         cv::Mat img2 = cv::imread(allImage[i], 0);
         
@@ -216,11 +218,11 @@ tc->lighting_insensitive = 1;
         cv::imshow("img2", img2rgb);
         cv::waitKey(1);
     }
-    size_t length = featureLogging._allFeature[5]._location.size();
-    cout << "sdfdsf: " << featureLogging._allFeature[5]._location[0].second << endl;
-    cout << "location of feature id 5: " << endl;
-    for(int i=0; i<length; ++i)
-        cout << featureLogging._allFeature[5]._location[i].first << " " << featureLogging._allFeature[5]._location[i].second << endl;
+    // size_t length = featureLogging._allFeature[5]._location.size();
+    // cout << "sdfdsf: " << featureLogging._allFeature[5]._location[0].second << endl;
+    // cout << "location of feature id 5: " << endl;
+    // for(int i=0; i<length; ++i)
+    //     cout << featureLogging._allFeature[5]._location[i].first << " " << featureLogging._allFeature[5]._location[i].second << endl;
     // KLTWriteFeatureTable(ft, "features.txt", "%5.1f");
     // KLTWriteFeatureTable(ft, "features.ft", NULL);
     running_tracking_stocastic(featureLogging);

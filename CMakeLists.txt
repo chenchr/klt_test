@@ -34,13 +34,13 @@ klt
 /usr/lib/x86_64-linux-gnu/libopencv_imgproc.so
 /usr/lib/x86_64-linux-gnu/libopencv_highgui.so
 /usr/lib/x86_64-linux-gnu/libopencv_core.so
-${OpenCV_LIBS}
+# ${OpenCV_LIBS}
 )
 
 add_executable(euroc_cv euroc_opencv.cpp)
 target_link_libraries(euroc_cv 
 klt 
-${OpenCV_LIBS}
+# ${OpenCV_LIBS}
 /usr/lib/x86_64-linux-gnu/libopencv_imgproc.so
 /usr/lib/x86_64-linux-gnu/libopencv_highgui.so
 /usr/lib/x86_64-linux-gnu/libopencv_core.so

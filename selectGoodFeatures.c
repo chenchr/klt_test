@@ -352,7 +352,6 @@ void _KLTSelectGoodFeatures(
     gradx    = _KLTCreateFloatImage(ncols, nrows);
     grady    = _KLTCreateFloatImage(ncols, nrows);
     if (tc->smoothBeforeSelecting)  {
-      printf("smoothBeforeSelecting\n");
       _KLT_FloatImage tmpimg;
       tmpimg = _KLTCreateFloatImage(ncols, nrows);
       _KLTToFloatImage(img, ncols, nrows, tmpimg);
